@@ -595,7 +595,7 @@ class TestSetThread extends Thread
 		String ob_json=ObjectUtil.bean2Json(ob);
 		if(ob_json!=null)
 		{
-			client.jc.rpush("name",ob_json);
+			client.setListValueFromLeft("name",ob_json);
 		}
 		try {
 			if(barrier!=null)
