@@ -1,9 +1,11 @@
-package redis.clients.jedis.tests;
+package redis.clients.util;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CyclicBarrier;
 
@@ -12,15 +14,13 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.util.Ob;
-import redis.clients.util.ObjectUtil;
 
 /**
  * redis集群的操作工具类封装
  * @author fyz
  *
  */
-public class ClusterUseTest {
+public class JedisClusterClient {
 	private static JedisPool pool; 					// 线程池对象
 	private static String ADDR = "101.236.60.51"; 	// redis所在服务器地址（案例中是在本机）
 	private static int PORT = 7000; 				// 端口号
@@ -34,7 +34,49 @@ public class ClusterUseTest {
 	public static Set<HostAndPort> jedisClusterNodes = new HashSet<HostAndPort>();
 	public static JedisCluster jc = null;
 	
-	private ClusterUseTest()
+	/**
+	 * 加载外部配置文件
+	 */
+	public void loadConfig()
+	{
+		try
+		{
+			InputStream inStream=JedisClusterClient.class.getClassLoader().getResourceAsStream("/redis-cluster-config.properties");
+			Properties pro=new Properties();
+			pro.load(inStream);
+			String master_ip=pro.getProperty("master_ip");
+			String master_port=pro.getProperty("master_port");
+			String max_idle=pro.getProperty("max_idle");
+			String max_active=pro.getProperty("max_active");
+			String max_wait=pro.getProperty("max_wait");
+			String timeout=pro.getProperty("timeout");
+			if(master_ip!=null&&!"".equals(master_ip))
+			{
+				ADDR=master_ip;
+			}
+			if(master_port!=null&&!"".equals(master_port))
+			{
+				PORT=Integer.parseInt(master_port);
+			}
+			if(max_idle!=null&&!"".equals(max_idle))
+			{
+				MAX_IDLE=Integer.parseInt(max_idle);
+			}
+			if(max_active!=null&&!"".equals(max_active))
+			{
+				MAX_ACTIVE=Integer.parseInt(max_active);
+			}
+			if(max_wait!=null&&!"".equals(max_wait))
+			{
+				MAX_WAIT=Integer.parseInt(max_wait);
+			}
+			if(timeout!=null&&!"".equals(timeout))
+			{
+				TIMEOUT=Integer.parseInt(timeout);
+			}
+		}catch(Exception e){e.printStackTrace();}
+	}
+	private JedisClusterClient()
 	{
 		/**
 		 * 由于集群的自动发现和连接性，所以，只需要连接集群中的一个节点即可
@@ -64,12 +106,12 @@ public class ClusterUseTest {
 		*/
 		jc = new JedisCluster(jedisClusterNodes,config);
 	}
-	private static ClusterUseTest instance=null;
-	public static ClusterUseTest getInstance()
+	private static JedisClusterClient instance=null;
+	public static JedisClusterClient getInstance()
 	{
 		if(instance==null)
 		{
-			instance=new ClusterUseTest();
+			instance=new JedisClusterClient();
 		}
 		return instance;
 	}
@@ -471,9 +513,9 @@ public class ClusterUseTest {
 //		System.out.println("key:"+key+",value:"+value+",time:"+(end.getTime()-start.getTime()));
 	}
 	public static void main(String[] args) {
-		ClusterUseTest redisClient=ClusterUseTest.getInstance();
+		JedisClusterClient redisClient=JedisClusterClient.getInstance();
 		System.out.println(redisClient.jc.get("name"));
-		if(1==1){return;}
+//		if(1==1){return;}
 		//==删除测试
 //		for(int i=0;i<4;i++)
 //		{
@@ -486,14 +528,14 @@ public class ClusterUseTest {
 //		ob.setAge(32);
 //		ob.setName("fyz");
 //		String ob_json=ObjectUtil.bean2Json(ob);
-//		ClusterUseTest.setListValueFromRight("name",ob_json);
+//		JedisClusterClient.setListValueFromRight("name",ob_json);
 		//==list类型变量读取
 //		long start1 = System.currentTimeMillis();
-//		List<String> list=ClusterUseTest.getListAll("name");
+//		List<String> list=JedisClusterClient.getListAll("name");
 //		 long end1 = System.currentTimeMillis();
 //		 System.out.println("redis读数据耗时：" + (end1 - start1));
 //		System.out.println("list:"+list);
-//		System.out.println("list len:"+ClusterUseTest.listLen("name"));
+//		System.out.println("list len:"+JedisClusterClient.listLen("name"));
 //		for(String str:list){
 //            System.out.println("[获取对象数据]：" + str);
 //            Ob get_ob=ObjectUtil.json2Bean(str,Ob.class);
@@ -501,11 +543,11 @@ public class ClusterUseTest {
 //        }
 //		if(1==1){return;}
 		//==测试设置键
-//		ClusterUseTest.set("name1",new Random().nextInt(100)+"");
+//		JedisClusterClient.set("name1",new Random().nextInt(100)+"");
 		//==测试删除键
-//		ClusterUseTest.delete(new String[]{"name1"});
-//		String value1=ClusterUseTest.get("name1");
-//		String value2=ClusterUseTest.get("name2");
+//		JedisClusterClient.delete(new String[]{"name1"});
+//		String value1=JedisClusterClient.get("name1");
+//		String value2=JedisClusterClient.get("name2");
 //		System.out.println("key1 value:"+value1+","+",key2:"+value2);
 		//==测试Map相关操作 key相同的会被覆盖更新
 		Map<String,String> userMap=new HashMap<String,String>();
@@ -516,21 +558,21 @@ public class ClusterUseTest {
 		userMap.put(m1_ob.getPkid()+"", ObjectUtil.bean2Json(m1_ob));
 		userMap.put(m2_ob.getPkid()+"", ObjectUtil.bean2Json(m2_ob));
 		//一次更新多个map中的key value
-		ClusterUseTest.setMap("userMap", userMap);
+		JedisClusterClient.setMap("userMap", userMap);
 		//一次更新一个map中的key的value
-		ClusterUseTest.setMapByKey("userMap", m1_ob_update.getPkid()+"",ObjectUtil.bean2Json(m1_ob_update));
+		JedisClusterClient.setMapByKey("userMap", m1_ob_update.getPkid()+"",ObjectUtil.bean2Json(m1_ob_update));
 		//返回整个Map表
-		Map<String,String> get_userMap=ClusterUseTest.getMap("userMap");
+		Map<String,String> get_userMap=JedisClusterClient.getMap("userMap");
 		System.out.println("userMap:"+get_userMap);
 		//返回 map中的单条数据
-		String return_m1_ob_json=ClusterUseTest.getMapValueByKey("userMap",m1_ob.getPkid()+"");
+		String return_m1_ob_json=JedisClusterClient.getMapValueByKey("userMap",m1_ob.getPkid()+"");
 		System.out.println("userObj:"+ObjectUtil.json2Bean(return_m1_ob_json, Ob.class));
 		//查找所有库中的key
-		Set<String> keys=ClusterUseTest.findKeys("*");
+		Set<String> keys=JedisClusterClient.findKeys("*");
 		for(String key:keys)
 		{
 			//判断key的类型
-			System.out.println("key type:"+ClusterUseTest.jc.type(key));
+			System.out.println("key type:"+JedisClusterClient.jc.type(key));
 		}
 		System.out.println("keys:"+keys);
 		/*
@@ -581,8 +623,8 @@ public class ClusterUseTest {
 class TestSetThread extends Thread
 {
 	private CyclicBarrier barrier;
-	private ClusterUseTest client;
-	public TestSetThread(CyclicBarrier barrier,ClusterUseTest client)
+	private JedisClusterClient client;
+	public TestSetThread(CyclicBarrier barrier,JedisClusterClient client)
 	{
 		this.barrier=barrier;
 		this.client=client;

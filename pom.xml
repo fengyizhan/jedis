@@ -1,54 +1,23 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
-  <parent>
-    <groupId>org.sonatype.oss</groupId>
-    <artifactId>oss-parent</artifactId>
-    <version>7</version>
-  </parent>
+	<distributionManagement>
+		<repository>
+			<id>ccservice</id>
+			<url>http://maven.hangtian123.com.cn/nexus/content/repositories/ccservice</url>
+		</repository>
+	</distributionManagement>
+	
 	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.ccservice.util.redis-client</groupId>
+	<artifactId>redis-client</artifactId>
+	<version>0.0.1</version>
 	<packaging>jar</packaging>
-	<groupId>redis.clients</groupId>
-	<artifactId>jedis</artifactId>
-	<version>3.0.0-SNAPSHOT</version>
-	<name>Jedis</name>
-	<description>Jedis is a blazingly small and sane Redis java client.</description>
-  <url>https://github.com/xetorthio/jedis</url>
 
-	<mailingLists>
-		<mailingList>
-			<name>Jedis Mailing List</name>
-			<post>jedis_redis@googlegroups.com</post>
-			<archive>
-        http://groups.google.com/group/jedis_redis
-      </archive>
-		</mailingList>
-	</mailingLists>
-
-	<licenses>
-		<license>
-			<name>MIT</name>
-			<url>http://github.com/xetorthio/jedis/raw/master/LICENSE.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
-
-	<issueManagement>
-		<system>github</system>
-		<url>http://github.com/xetorthio/jedis/issues</url>
-	</issueManagement>
-
-  <scm>
-    <connection>scm:git:git@github.com:xetorthio/jedis.git</connection>
-    <url>scm:git:git@github.com:xetorthio/jedis.git</url>
-    <developerConnection>scm:git:git@github.com:xetorthio/jedis.git</developerConnection>
-    <tag>jedis-2.2.0</tag>
-  </scm>
+	<name>redis-client</name>
+	<url>http://maven.apache.org</url>
 
 	<properties>
-		<redis-hosts></redis-hosts>
-		<sentinel-hosts></sentinel-hosts>
-		<cluster-hosts>localhost:7000,localhost:7001,localhost:7002,localhost:7003,localhost:7004,localhost:7005</cluster-hosts>
-    	<github.global.server>github</github.global.server>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<dependencies>
@@ -90,14 +59,6 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
-  <distributionManagement>
-      <repository>
-          <id>github</id>
-          <name>GitHub ${project.artifactId} Repository</name>
-          <url>https://raw.github.com/xetorthio/${project.artifactId}/mvn-repo</url>
-      </repository>
-  </distributionManagement>
 
 	<build>
 		<plugins>
