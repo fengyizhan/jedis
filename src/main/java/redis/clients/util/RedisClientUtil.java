@@ -1,5 +1,7 @@
 package redis.clients.util;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,12 +39,22 @@ public class RedisClientUtil {
 	/**
 	 * 加载外部配置文件
 	 */
-	public void loadConfig()
+	public static void loadConfig(String... path)
 	{
 		try
 		{
-			InputStream inStream=RedisClientUtil.class.getClassLoader().getResourceAsStream("/redis-cluster-config.properties");
 			Properties pro=new Properties();
+			InputStream inStream=null;
+			if(path==null)
+			{//如果未指定，默认认为当前是Web集成方式，那么只需要加载classes目录下的redis-cluster-config.properties即可
+				System.out.println("WEB项目启动时加载redis配置文件路径：WEB-INF/classes/redis-cluster-config.properties");
+				inStream=RedisClientUtil.class.getClassLoader().getResourceAsStream("/redis-cluster-config.properties");
+			}else
+			{//如果指定，默认认为是加载与主jar包所在的目录下的redis-cluster-config.properties即可
+				File configFile=new File(path[0]);
+				System.out.println("JAR项目启动时加载redis配置文件路径："+configFile.getAbsolutePath());
+				inStream=new FileInputStream(configFile);
+			}
 			pro.load(inStream);
 			String master_ip=pro.getProperty("master_ip");
 			String master_port=pro.getProperty("master_port");
