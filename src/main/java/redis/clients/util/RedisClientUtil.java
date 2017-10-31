@@ -20,7 +20,7 @@ import redis.clients.jedis.JedisPoolConfig;
  * @author fyz
  *
  */
-public class JedisClusterClient {
+public class RedisClientUtil {
 	private static JedisPool pool; 					// 线程池对象
 	private static String ADDR = "101.236.60.51"; 	// redis所在服务器地址（案例中是在本机）
 	private static int PORT = 7000; 				// 端口号
@@ -41,7 +41,7 @@ public class JedisClusterClient {
 	{
 		try
 		{
-			InputStream inStream=JedisClusterClient.class.getClassLoader().getResourceAsStream("/redis-cluster-config.properties");
+			InputStream inStream=RedisClientUtil.class.getClassLoader().getResourceAsStream("/redis-cluster-config.properties");
 			Properties pro=new Properties();
 			pro.load(inStream);
 			String master_ip=pro.getProperty("master_ip");
@@ -76,7 +76,7 @@ public class JedisClusterClient {
 			}
 		}catch(Exception e){e.printStackTrace();}
 	}
-	private JedisClusterClient()
+	private RedisClientUtil()
 	{
 		/**
 		 * 由于集群的自动发现和连接性，所以，只需要连接集群中的一个节点即可
@@ -106,12 +106,12 @@ public class JedisClusterClient {
 		*/
 		jc = new JedisCluster(jedisClusterNodes,config);
 	}
-	private static JedisClusterClient instance=null;
-	public static JedisClusterClient getInstance()
+	private static RedisClientUtil instance=null;
+	public static RedisClientUtil getInstance()
 	{
 		if(instance==null)
 		{
-			instance=new JedisClusterClient();
+			instance=new RedisClientUtil();
 		}
 		return instance;
 	}
@@ -513,7 +513,7 @@ public class JedisClusterClient {
 //		System.out.println("key:"+key+",value:"+value+",time:"+(end.getTime()-start.getTime()));
 	}
 	public static void main(String[] args) {
-		JedisClusterClient redisClient=JedisClusterClient.getInstance();
+		RedisClientUtil redisClient=RedisClientUtil.getInstance();
 		System.out.println(redisClient.jc.get("name"));
 //		if(1==1){return;}
 		//==删除测试
@@ -528,14 +528,14 @@ public class JedisClusterClient {
 //		ob.setAge(32);
 //		ob.setName("fyz");
 //		String ob_json=ObjectUtil.bean2Json(ob);
-//		JedisClusterClient.setListValueFromRight("name",ob_json);
+//		RedisClientUtil.setListValueFromRight("name",ob_json);
 		//==list类型变量读取
 //		long start1 = System.currentTimeMillis();
-//		List<String> list=JedisClusterClient.getListAll("name");
+//		List<String> list=RedisClientUtil.getListAll("name");
 //		 long end1 = System.currentTimeMillis();
 //		 System.out.println("redis读数据耗时：" + (end1 - start1));
 //		System.out.println("list:"+list);
-//		System.out.println("list len:"+JedisClusterClient.listLen("name"));
+//		System.out.println("list len:"+RedisClientUtil.listLen("name"));
 //		for(String str:list){
 //            System.out.println("[获取对象数据]：" + str);
 //            Ob get_ob=ObjectUtil.json2Bean(str,Ob.class);
@@ -543,11 +543,11 @@ public class JedisClusterClient {
 //        }
 //		if(1==1){return;}
 		//==测试设置键
-//		JedisClusterClient.set("name1",new Random().nextInt(100)+"");
+//		RedisClientUtil.set("name1",new Random().nextInt(100)+"");
 		//==测试删除键
-//		JedisClusterClient.delete(new String[]{"name1"});
-//		String value1=JedisClusterClient.get("name1");
-//		String value2=JedisClusterClient.get("name2");
+//		RedisClientUtil.delete(new String[]{"name1"});
+//		String value1=RedisClientUtil.get("name1");
+//		String value2=RedisClientUtil.get("name2");
 //		System.out.println("key1 value:"+value1+","+",key2:"+value2);
 		//==测试Map相关操作 key相同的会被覆盖更新
 		Map<String,String> userMap=new HashMap<String,String>();
@@ -558,21 +558,21 @@ public class JedisClusterClient {
 		userMap.put(m1_ob.getPkid()+"", ObjectUtil.bean2Json(m1_ob));
 		userMap.put(m2_ob.getPkid()+"", ObjectUtil.bean2Json(m2_ob));
 		//一次更新多个map中的key value
-		JedisClusterClient.setMap("userMap", userMap);
+		RedisClientUtil.setMap("userMap", userMap);
 		//一次更新一个map中的key的value
-		JedisClusterClient.setMapByKey("userMap", m1_ob_update.getPkid()+"",ObjectUtil.bean2Json(m1_ob_update));
+		RedisClientUtil.setMapByKey("userMap", m1_ob_update.getPkid()+"",ObjectUtil.bean2Json(m1_ob_update));
 		//返回整个Map表
-		Map<String,String> get_userMap=JedisClusterClient.getMap("userMap");
+		Map<String,String> get_userMap=RedisClientUtil.getMap("userMap");
 		System.out.println("userMap:"+get_userMap);
 		//返回 map中的单条数据
-		String return_m1_ob_json=JedisClusterClient.getMapValueByKey("userMap",m1_ob.getPkid()+"");
+		String return_m1_ob_json=RedisClientUtil.getMapValueByKey("userMap",m1_ob.getPkid()+"");
 		System.out.println("userObj:"+ObjectUtil.json2Bean(return_m1_ob_json, Ob.class));
 		//查找所有库中的key
-		Set<String> keys=JedisClusterClient.findKeys("*");
+		Set<String> keys=RedisClientUtil.findKeys("*");
 		for(String key:keys)
 		{
 			//判断key的类型
-			System.out.println("key type:"+JedisClusterClient.jc.type(key));
+			System.out.println("key type:"+RedisClientUtil.jc.type(key));
 		}
 		System.out.println("keys:"+keys);
 		/*
@@ -623,8 +623,8 @@ public class JedisClusterClient {
 class TestSetThread extends Thread
 {
 	private CyclicBarrier barrier;
-	private JedisClusterClient client;
-	public TestSetThread(CyclicBarrier barrier,JedisClusterClient client)
+	private RedisClientUtil client;
+	public TestSetThread(CyclicBarrier barrier,RedisClientUtil client)
 	{
 		this.barrier=barrier;
 		this.client=client;
