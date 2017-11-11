@@ -525,9 +525,18 @@ public class RedisClientUtil {
 //		System.out.println("key:"+key+",value:"+value+",time:"+(end.getTime()-start.getTime()));
 	}
 	public static void main(String[] args) {
-		RedisClientUtil redisClient=RedisClientUtil.getInstance();
-		System.out.println(redisClient.jc.get("name"));
-//		if(1==1){return;}
+		/**
+		 * 1.从当前项目加载配置文件
+		 */
+		RedisClientUtil.loadConfig("redis-cluster-config.properties");
+		/**
+		 * 2.创建实例
+		 */
+		RedisClientUtil.getInstance();
+		String keyStr="order.id.{123}";
+		RedisClientUtil.set(keyStr,"{name:'fyz',age:19}");
+		System.out.println(RedisClientUtil.get(keyStr));
+		if(1==1){return;}
 		//==删除测试
 //		for(int i=0;i<4;i++)
 //		{
